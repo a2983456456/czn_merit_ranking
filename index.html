@@ -582,20 +582,22 @@
       const totalFront   = Object.values(front).reduce((a,b)=>a+b,0);
       const totalBack    = Object.values(back).reduce((a,b)=>a+b,0);
 
-      function mapToSortedArray(map, total) {
+      // 加上 factor 參數，讓不同區塊可以乘不同倍率
+      function mapToSortedArray(map, total, factor) {
         const arr = Object.entries(map).map(([role,count]) => ({
           role,
           count,
-          percent: total ? (count / total * 100) : 0
+          // 整體: factor=6；先鋒 / 後援: factor=3
+          percent: total ? (count / total * 100 * factor) : 0
         }));
         arr.sort((a,b)=> b.count - a.count || a.role.localeCompare(b.role,"zh-Hant"));
         return arr;
       }
 
       return {
-        overall: mapToSortedArray(overall, totalOverall),
-        front:   mapToSortedArray(front, totalFront),
-        back:    mapToSortedArray(back, totalBack)
+        overall: mapToSortedArray(overall, totalOverall, 6), // 整體 *6
+        front:   mapToSortedArray(front,   totalFront,   3), // 先鋒 *3
+        back:    mapToSortedArray(back,    totalBack,    3)  // 後援 *3
       };
     }
 
@@ -636,7 +638,8 @@
 
         const cnt = document.createElement("div");
         cnt.className = "role-usage-count";
-        cnt.textContent = `${item.count} (${item.percent.toFixed(1)}%)`;
+        // 只顯示百分比
+        cnt.textContent = `${item.percent.toFixed(1)}%`;
         row.appendChild(cnt);
 
         container.appendChild(row);
@@ -737,7 +740,8 @@
 
         const cnt = document.createElement("div");
         cnt.className = "squad-count";
-        cnt.textContent = `${item.count} (${item.percent.toFixed(1)}%)`;
+        // 只顯示百分比
+        cnt.textContent = `${item.percent.toFixed(1)}%`;
         row.appendChild(cnt);
 
         container.appendChild(row);

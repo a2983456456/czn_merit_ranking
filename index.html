@@ -14,20 +14,53 @@
       min-height: 100%;
     }
 
+    .hidden {
+      display: none !important;
+    }
+
     main {
       padding: 24px 32px 48px;
       max-width: 1400px;
       margin: 0 auto;
     }
 
-    /* ---------- 上次更新 ---------- */
+    /* 上次更新 */
     #updateInfo {
       margin-bottom: 16px;
       font-size: 18px;
       color: #cbd5e1;
     }
 
-    /* ---------- 表格 ---------- */
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 8px;
+      border-bottom: 1px solid #1f2937;
+      margin-bottom: 16px;
+    }
+    .tab-btn {
+      padding: 8px 16px;
+      border: none;
+      background: transparent;
+      color: #9ca3af;
+      font-size: 18px;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      transition: 0.15s;
+    }
+    .tab-btn.active {
+      color: #e5e7eb;
+      border-color: #3b82f6;
+      font-weight: 600;
+    }
+    .tab-panel {
+      display: none;
+    }
+    .tab-panel.active {
+      display: block;
+    }
+
+    /* 排行榜：表格 */
     table {
       width: 100%;
       border-collapse: collapse;
@@ -57,7 +90,6 @@
     tbody tr:hover {
       background: #111827;
     }
-
     td.rank {
       font-weight: 700;
       color: #60a5fa;
@@ -73,7 +105,6 @@
       font-variant-numeric: tabular-nums;
     }
 
-    /* ---------- 隊伍角色 ---------- */
     .roles-cell {
       display: flex;
       gap: 10px;
@@ -102,9 +133,10 @@
       font-weight: 500;
     }
 
-    /* ---------- 角色篩選區 ---------- */
+    /* 角色篩選區（排行榜頁籤用） */
     .role-filters {
-      margin-top: 16px;
+      margin-top: 8px;
+      margin-bottom: 8px;
       padding: 16px;
       background: #020617;
       border: 1px solid #1f2937;
@@ -138,38 +170,187 @@
       font-size: 22px;
       font-weight: 800;
     }
-
     .filter-neutral { border-color: #64748b; }
     .filter-must    { border-color: #16a34a; background: rgba(22,163,74,0.25); }
     .filter-not     { border-color: #dc2626; background: rgba(220,38,38,0.25); }
 
+    /* 使用率區塊通用布局 */
+    .usage-row {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+    .usage-col {
+      flex: 1;
+      min-width: 280px;
+      background: #020617;
+      border-radius: 16px;
+      border: 1px solid #1f2937;
+      padding: 16px;
+      box-sizing: border-box;
+    }
+    .usage-col-title {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: #e5e7eb;
+    }
+
+    /* 角色使用率：每一行 */
+    .role-usage-row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .role-usage-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-right: 8px;
+    }
+    .role-usage-name {
+      width: 90px;
+      font-size: 16px;
+      margin-right: 8px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .role-usage-bar-wrap {
+      flex: 1;
+      background: #1e293b;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-right: 8px;
+      height: 20px;
+    }
+    .role-usage-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #3b82f6, #60a5fa);
+    }
+    .role-usage-count {
+      width: 90px;
+      font-size: 16px;
+      text-align: right;
+    }
+
+    /* 三人小隊使用率行 */
+    .squad-row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .squad-icons {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-right: 8px;
+    }
+    .squad-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    .squad-names {
+      width: 120px;
+      font-size: 14px;
+      margin-right: 8px;
+      line-height: 1.2;
+    }
+    .squad-bar-wrap {
+      flex: 1;
+      background: #1e293b;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-right: 8px;
+      height: 20px;
+    }
+    .squad-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #22c55e, #4ade80);
+    }
+    .squad-count {
+      width: 100px;
+      text-align: right;
+      font-size: 16px;
+    }
+
+    @media (max-width: 900px) {
+      main {
+        padding: 16px;
+      }
+      .usage-col {
+        min-width: 100%;
+      }
+    }
   </style>
 </head>
 
 <body>
   <main>
-
     <!-- 上次更新時間 -->
     <div id="updateInfo">
       上次更新：<span id="lastUpdateText">讀取中…</span>
     </div>
 
-    <!-- 角色篩選區 -->
-    <div id="roleFilters" class="role-filters"></div>
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="tab-ranking">排行榜</button>
+      <button class="tab-btn" data-tab="tab-role-usage">角色使用率</button>
+      <button class="tab-btn" data-tab="tab-team-usage">隊伍使用率</button>
+    </div>
 
-    <!-- 表格 -->
-    <table>
-      <thead>
-        <tr>
-          <th>名次</th>
-          <th>先鋒隊</th>
-          <th>後援隊</th>
-          <th>分數</th>
-        </tr>
-      </thead>
-      <tbody id="teamBody"></tbody>
-    </table>
+    <!-- 排行榜 -->
+    <section id="tab-ranking" class="tab-panel active">
+      <div id="roleFilters" class="role-filters"></div>
 
+      <table>
+        <thead>
+          <tr>
+            <th>名次</th>
+            <th>先鋒隊</th>
+            <th>後援隊</th>
+            <th>分數</th>
+          </tr>
+        </thead>
+        <tbody id="teamBody"></tbody>
+      </table>
+    </section>
+
+    <!-- 角色使用率 -->
+    <section id="tab-role-usage" class="tab-panel">
+      <div class="usage-row">
+        <div class="usage-col">
+          <div class="usage-col-title">整體</div>
+          <div id="roleUsageOverall"></div>
+        </div>
+        <div class="usage-col">
+          <div class="usage-col-title">先鋒隊</div>
+          <div id="roleUsageFront"></div>
+        </div>
+        <div class="usage-col">
+          <div class="usage-col-title">後援隊</div>
+          <div id="roleUsageBack"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 隊伍使用率（3人小隊） -->
+    <section id="tab-team-usage" class="tab-panel">
+      <div class="usage-row">
+        <div class="usage-col">
+          <div class="usage-col-title">先鋒隊三人小隊</div>
+          <div id="squadUsageFront"></div>
+        </div>
+        <div class="usage-col">
+          <div class="usage-col-title">後援隊三人小隊</div>
+          <div id="squadUsageBack"></div>
+        </div>
+      </div>
+    </section>
   </main>
 
   <script>
@@ -179,15 +360,15 @@
 
     let allTeams = [];
     let filteredTeams = [];
-    const roleStates = {};
+    const roleStates = {}; // 0 neutral, 1 must, -1 not
     let lastUpdateDate = null;
 
-    /* ----------- Load CSV ----------- */
+    /* ----------- 讀 CSV ----------- */
     async function loadCSV() {
       const res = await fetch(CSV_PATH);
       const text = await res.text();
       const rows = text.trim().split(/\r?\n/);
-      rows.shift();
+      rows.shift(); // 移除 header
 
       return rows.map((line, i) => {
         const col = line.split(",");
@@ -199,7 +380,7 @@
       });
     }
 
-    /* ----------- Build Role Pill ----------- */
+    /* ----------- 共用：角色 pill ----------- */
     function rolePill(role) {
       const div = document.createElement("div");
       div.className = "role-pill";
@@ -217,7 +398,7 @@
       return div;
     }
 
-    /* ----------- Render Table ----------- */
+    /* ----------- 排行榜：渲染隊伍 ----------- */
     function renderTeams(list) {
       const body = document.getElementById("teamBody");
       body.innerHTML = "";
@@ -253,7 +434,7 @@
       });
     }
 
-    /* ----------- Role Filters ----------- */
+    /* ----------- 排行榜：角色篩選 ----------- */
     function buildFilters() {
       const box = document.getElementById("roleFilters");
       box.innerHTML = "";
@@ -330,9 +511,10 @@
       });
 
       renderTeams(filteredTeams);
+      // 角色/隊伍使用率目前以 allTeams 為基準，不跟著篩選變
     }
 
-    /* ----------- Update Time ----------- */
+    /* ----------- 上次更新時間 ----------- */
     function formatTimeDiff(fromDate, now) {
       const diffMs = now - fromDate;
       if (diffMs < 0) return "剛剛";
@@ -365,24 +547,235 @@
       try {
         const res = await fetch(LAST_UPDATE_PATH);
         const text = (await res.text()).trim();
+        if (!text) throw new Error("空白");
         lastUpdateDate = new Date(text);
-
         updateLastUpdateLabel();
         setInterval(updateLastUpdateLabel, 60 * 1000);
-
       } catch (e) {
-        document.getElementById("lastUpdateText").textContent = "載入失敗";
+        const span = document.getElementById("lastUpdateText");
+        span.textContent = "載入失敗";
       }
+    }
+
+    /* ----------- 角色使用率計算 ----------- */
+    function computeRoleUsage() {
+      const overall = {};
+      const front = {};
+      const back = {};
+
+      allTeams.forEach(team => {
+        team.roles.forEach((r, idx) => {
+          if (r.startsWith("UNKNOWN(")) return;
+          overall[r] = (overall[r] || 0) + 1;
+          if (idx < 3) {
+            front[r] = (front[r] || 0) + 1;
+          } else {
+            back[r] = (back[r] || 0) + 1;
+          }
+        });
+      });
+
+      const totalOverall = Object.values(overall).reduce((a,b)=>a+b,0);
+      const totalFront   = Object.values(front).reduce((a,b)=>a+b,0);
+      const totalBack    = Object.values(back).reduce((a,b)=>a+b,0);
+
+      function mapToSortedArray(map, total) {
+        const arr = Object.entries(map).map(([role,count]) => ({
+          role,
+          count,
+          percent: total ? (count / total * 100) : 0
+        }));
+        arr.sort((a,b)=> b.count - a.count || a.role.localeCompare(b.role,"zh-Hant"));
+        return arr;
+      }
+
+      return {
+        overall: mapToSortedArray(overall, totalOverall),
+        front:   mapToSortedArray(front, totalFront),
+        back:    mapToSortedArray(back, totalBack)
+      };
+    }
+
+    function renderRoleUsageList(targetId, list) {
+      const container = document.getElementById(targetId);
+      container.innerHTML = "";
+
+      if (!list.length) {
+        container.innerHTML = "<div style='color:#94a3b8'>無資料</div>";
+        return;
+      }
+
+      const maxCount = list[0].count || 1;
+
+      list.forEach(item => {
+        const row = document.createElement("div");
+        row.className = "role-usage-row";
+
+        const img = document.createElement("img");
+        img.className = "role-usage-icon";
+        img.src = `${IMG_BASE}/${encodeURIComponent(item.role)}.png`;
+        img.onerror = () => img.classList.add("hidden");
+        row.appendChild(img);
+
+        const name = document.createElement("div");
+        name.className = "role-usage-name";
+        name.textContent = item.role;
+        row.appendChild(name);
+
+        const wrap = document.createElement("div");
+        wrap.className = "role-usage-bar-wrap";
+
+        const bar = document.createElement("div");
+        bar.className = "role-usage-bar";
+        bar.style.width = (item.count / maxCount * 100) + "%";
+        wrap.appendChild(bar);
+        row.appendChild(wrap);
+
+        const cnt = document.createElement("div");
+        cnt.className = "role-usage-count";
+        cnt.textContent = `${item.count} (${item.percent.toFixed(1)}%)`;
+        row.appendChild(cnt);
+
+        container.appendChild(row);
+      });
+    }
+
+    function renderRoleUsageAll() {
+      const usage = computeRoleUsage();
+      renderRoleUsageList("roleUsageOverall", usage.overall);
+      renderRoleUsageList("roleUsageFront",   usage.front);
+      renderRoleUsageList("roleUsageBack",    usage.back);
+    }
+
+    /* ----------- 三人小隊使用率（順序無關） ----------- */
+    function computeSquadUsage() {
+      const frontMap = {};
+      const backMap  = {};
+
+      allTeams.forEach(team => {
+        const f = team.roles.slice(0,3);
+        const b = team.roles.slice(3,6);
+
+        // 如果有 UNKNOWN 就跳過該小隊
+        if (!f.some(r => r.startsWith("UNKNOWN("))) {
+          const fSorted = [...f].sort((a,b)=>a.localeCompare(b,"zh-Hant"));
+          const keyF = fSorted.join("|");
+          if (!frontMap[keyF]) {
+            frontMap[keyF] = { roles: fSorted, count: 0 };
+          }
+          frontMap[keyF].count += 1;
+        }
+
+        if (!b.some(r => r.startsWith("UNKNOWN("))) {
+          const bSorted = [...b].sort((a,b)=>a.localeCompare(b,"zh-Hant"));
+          const keyB = bSorted.join("|");
+          if (!backMap[keyB]) {
+            backMap[keyB] = { roles: bSorted, count: 0 };
+          }
+          backMap[keyB].count += 1;
+        }
+      });
+
+      function mapToSortedArray(map) {
+        const arr = Object.values(map);
+        const total = arr.reduce((a,x)=>a+x.count,0) || 1;
+        arr.forEach(x => {
+          x.percent = x.count / total * 100;
+        });
+        arr.sort((a,b)=> b.count - a.count ||
+                         a.roles.join(",").localeCompare(b.roles.join(","),"zh-Hant"));
+        return arr;
+      }
+
+      return {
+        front: mapToSortedArray(frontMap),
+        back:  mapToSortedArray(backMap)
+      };
+    }
+
+    function renderSquadUsageList(targetId, list) {
+      const container = document.getElementById(targetId);
+      container.innerHTML = "";
+
+      if (!list.length) {
+        container.innerHTML = "<div style='color:#94a3b8'>無資料</div>";
+        return;
+      }
+
+      const maxCount = list[0].count || 1;
+
+      list.forEach(item => {
+        const row = document.createElement("div");
+        row.className = "squad-row";
+
+        const icons = document.createElement("div");
+        icons.className = "squad-icons";
+        item.roles.forEach(r => {
+          const img = document.createElement("img");
+          img.className = "squad-icon";
+          img.src = `${IMG_BASE}/${encodeURIComponent(r)}.png`;
+          img.onerror = () => img.classList.add("hidden");
+          icons.appendChild(img);
+        });
+        row.appendChild(icons);
+
+        const names = document.createElement("div");
+        names.className = "squad-names";
+        names.textContent = item.roles.join(" / ");
+        row.appendChild(names);
+
+        const wrap = document.createElement("div");
+        wrap.className = "squad-bar-wrap";
+        const bar = document.createElement("div");
+        bar.className = "squad-bar";
+        bar.style.width = (item.count / maxCount * 100) + "%";
+        wrap.appendChild(bar);
+        row.appendChild(wrap);
+
+        const cnt = document.createElement("div");
+        cnt.className = "squad-count";
+        cnt.textContent = `${item.count} (${item.percent.toFixed(1)}%)`;
+        row.appendChild(cnt);
+
+        container.appendChild(row);
+      });
+    }
+
+    function renderSquadUsageAll() {
+      const usage = computeSquadUsage();
+      renderSquadUsageList("squadUsageFront", usage.front);
+      renderSquadUsageList("squadUsageBack",  usage.back);
+    }
+
+    /* ----------- Tabs 切換 ----------- */
+    function setupTabs() {
+      const buttons = document.querySelectorAll(".tab-btn");
+      const panels = document.querySelectorAll(".tab-panel");
+
+      buttons.forEach(btn => {
+        btn.addEventListener("click", () => {
+          const target = btn.dataset.tab;
+
+          buttons.forEach(b => b.classList.remove("active"));
+          panels.forEach(p => p.classList.remove("active"));
+
+          btn.classList.add("active");
+          document.getElementById(target).classList.add("active");
+        });
+      });
     }
 
     /* ----------- INIT ----------- */
     async function init() {
+      setupTabs();
       allTeams = await loadCSV();
       filteredTeams = allTeams.slice();
 
       buildFilters();
       renderTeams(filteredTeams);
 
+      renderRoleUsageAll();
+      renderSquadUsageAll();
       loadLastUpdate();
     }
 

@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
-  <title>卡厄斯夢境 - 大龜裂功績排名</title>
+  <title>隊伍瀏覽</title>
   <style>
     html, body {
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -20,8 +20,14 @@
       margin: 0 auto;
     }
 
-    /* ---------- 表格 ---------- */
+    /* ---------- 上次更新 ---------- */
+    #updateInfo {
+      margin-bottom: 16px;
+      font-size: 18px;
+      color: #cbd5e1;
+    }
 
+    /* ---------- 表格 ---------- */
     table {
       width: 100%;
       border-collapse: collapse;
@@ -36,7 +42,7 @@
     }
     thead th {
       padding: 16px 12px;
-      font-size: 20px; /* ⭐ 表頭放大 */
+      font-size: 20px;
       font-weight: 700;
       color: #cbd5e1;
       white-space: nowrap;
@@ -44,7 +50,7 @@
     }
     tbody td {
       padding: 14px 12px;
-      font-size: 18px; /* ⭐ 表格內容放大 */
+      font-size: 18px;
       border-bottom: 1px solid #0f172a;
       vertical-align: middle;
     }
@@ -57,18 +63,17 @@
       color: #60a5fa;
       width: 60px;
       text-align: center;
-      font-size: 22px; /* ⭐ 名次最大 */
+      font-size: 22px;
     }
     td.score {
       font-weight: 800;
       color: #facc15;
       text-align: right;
-      font-size: 22px; /* ⭐ 分數更大 */
+      font-size: 22px;
       font-variant-numeric: tabular-nums;
     }
 
     /* ---------- 隊伍角色 ---------- */
-
     .roles-cell {
       display: flex;
       gap: 10px;
@@ -87,18 +92,17 @@
       white-space: nowrap;
     }
     .role-pill img {
-      width: 36px;   /* ⭐ 22 → 36：更大 */
+      width: 36px;
       height: 36px;
       border-radius: 999px;
       object-fit: cover;
     }
     .role-name {
-      font-size: 17px; /* ⭐ 11 → 17：大幅度改善 */
+      font-size: 17px;
       font-weight: 500;
     }
 
     /* ---------- 角色篩選區 ---------- */
-
     .role-filters {
       margin-top: 16px;
       padding: 16px;
@@ -122,29 +126,35 @@
       transition: 0.15s;
     }
     .filter-pill img {
-      width: 40px; /* ⭐ 26 → 40 超清晰 */
+      width: 40px;
       height: 40px;
       border-radius: 50%;
     }
     .filter-pill .name {
-      font-size: 18px; /* ⭐ 篩選的名字也放大 */
+      font-size: 18px;
       font-weight: 500;
     }
     .filter-pill .mark {
-      font-size: 22px; /* ⭐ 勾叉更清楚 */
+      font-size: 22px;
       font-weight: 800;
     }
 
     .filter-neutral { border-color: #64748b; }
     .filter-must    { border-color: #16a34a; background: rgba(22,163,74,0.25); }
     .filter-not     { border-color: #dc2626; background: rgba(220,38,38,0.25); }
+
   </style>
 </head>
 
 <body>
   <main>
 
-    <!-- 篩選角色 -->
+    <!-- 上次更新時間 -->
+    <div id="updateInfo">
+      上次更新：<span id="lastUpdateText">讀取中…</span>
+    </div>
+
+    <!-- 角色篩選區 -->
     <div id="roleFilters" class="role-filters"></div>
 
     <!-- 表格 -->
@@ -165,11 +175,14 @@
   <script>
     const IMG_BASE = "templates";
     const CSV_PATH = "results.csv";
+    const LAST_UPDATE_PATH = "last_update.txt";
 
     let allTeams = [];
     let filteredTeams = [];
-    const roleStates = {}; // 0 neutral, 1 must, -1 not
+    const roleStates = {};
+    let lastUpdateDate = null;
 
+    /* ----------- Load CSV ----------- */
     async function loadCSV() {
       const res = await fetch(CSV_PATH);
       const text = await res.text();
@@ -186,6 +199,7 @@
       });
     }
 
+    /* ----------- Build Role Pill ----------- */
     function rolePill(role) {
       const div = document.createElement("div");
       div.className = "role-pill";
@@ -203,6 +217,7 @@
       return div;
     }
 
+    /* ----------- Render Table ----------- */
     function renderTeams(list) {
       const body = document.getElementById("teamBody");
       body.innerHTML = "";
@@ -210,13 +225,11 @@
       list.forEach(t => {
         const tr = document.createElement("tr");
 
-        // 名次
         const tdR = document.createElement("td");
         tdR.className = "rank";
         tdR.textContent = t.rank;
         tr.appendChild(tdR);
 
-        // 先鋒隊
         const tdF = document.createElement("td");
         const f = document.createElement("div");
         f.className = "roles-cell";
@@ -224,7 +237,6 @@
         tdF.appendChild(f);
         tr.appendChild(tdF);
 
-        // 後援隊
         const tdB = document.createElement("td");
         const b = document.createElement("div");
         b.className = "roles-cell";
@@ -232,7 +244,6 @@
         tdB.appendChild(b);
         tr.appendChild(tdB);
 
-        // 分數
         const tdS = document.createElement("td");
         tdS.className = "score";
         tdS.textContent = t.score.toLocaleString();
@@ -242,6 +253,7 @@
       });
     }
 
+    /* ----------- Role Filters ----------- */
     function buildFilters() {
       const box = document.getElementById("roleFilters");
       box.innerHTML = "";
@@ -320,12 +332,58 @@
       renderTeams(filteredTeams);
     }
 
+    /* ----------- Update Time ----------- */
+    function formatTimeDiff(fromDate, now) {
+      const diffMs = now - fromDate;
+      if (diffMs < 0) return "剛剛";
+
+      const diffMin = Math.floor(diffMs / 60000);
+      if (diffMin < 1) return "剛剛";
+
+      if (diffMin < 60) return diffMin + " 分鐘前";
+
+      const hr = Math.floor(diffMin / 60);
+      const rm = diffMin % 60;
+      if (hr < 24) {
+        return rm === 0 ? `${hr} 小時前` : `${hr} 小時 ${rm} 分鐘前`;
+      }
+
+      const day = Math.floor(hr / 24);
+      return day + " 天前";
+    }
+
+    function updateLastUpdateLabel() {
+      const span = document.getElementById("lastUpdateText");
+      if (!lastUpdateDate) {
+        span.textContent = "未知";
+        return;
+      }
+      span.textContent = formatTimeDiff(lastUpdateDate, new Date());
+    }
+
+    async function loadLastUpdate() {
+      try {
+        const res = await fetch(LAST_UPDATE_PATH);
+        const text = (await res.text()).trim();
+        lastUpdateDate = new Date(text);
+
+        updateLastUpdateLabel();
+        setInterval(updateLastUpdateLabel, 60 * 1000);
+
+      } catch (e) {
+        document.getElementById("lastUpdateText").textContent = "載入失敗";
+      }
+    }
+
+    /* ----------- INIT ----------- */
     async function init() {
       allTeams = await loadCSV();
       filteredTeams = allTeams.slice();
 
       buildFilters();
       renderTeams(filteredTeams);
+
+      loadLastUpdate();
     }
 
     init();
